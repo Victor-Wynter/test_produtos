@@ -1,0 +1,244 @@
+{% extends 'produtos/base.html' %}
+{% load static %}
+
+{% block title %}Cadastrar Produto{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-plus me-2"></i>Cadastrar Novo Produto
+                </h3>
+            </div>
+            <div class="card-body">
+                <!-- Alertas -->
+                <div id="alert-container"></div>
+                
+                <!-- Formulário -->
+                <form id="produto-form">
+                    <div class="row">
+                        <!-- Nome do Produto -->
+                        <div class="col-12 mb-3">
+                            <label for="nome" class="form-label">
+                                <i class="fas fa-tag me-1"></i>Nome do Produto *
+                            </label>
+                            <input type="text" class="form-control" id="nome" name="nome" required>
+                            <div class="form-text">Nome completo do produto</div>
+                        </div>
+                        
+                        <!-- Tipo de Espectro -->
+                        <div class="col-md-6 mb-3">
+                            <label for="tipo_espectro" class="form-label">
+                                <i class="fas fa-leaf me-1"></i>Tipo de Espectro *
+                            </label>
+                            <select class="form-select" id="tipo_espectro" name="tipo_espectro" required>
+                                <option value="">Selecione...</option>
+                                <option value="sativa">Sativa</option>
+                                <option value="indica">Indica</option>
+                                <option value="hibrida">Híbrida</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Categoria Terapêutica -->
+                        <div class="col-md-6 mb-3">
+                            <label for="categoria_terapeutica" class="form-label">
+                                <i class="fas fa-stethoscope me-1"></i>Categoria Terapêutica *
+                            </label>
+                            <select class="form-select" id="categoria_terapeutica" name="categoria_terapeutica" required>
+                                <option value="">Selecione...</option>
+                                <option value="neurologia">Neurologia</option>
+                                <option value="pediatria">Pediatria</option>
+                                <option value="oncologia">Oncologia</option>
+                                <option value="dermatologia">Dermatologia</option>
+                                <option value="outros">Outros</option>
+                            </select>
+                        </div>
+                        
+                        <!-- THC Percentual -->
+                        <div class="col-md-6 mb-3">
+                            <label for="thc_percentual" class="form-label">
+                                <i class="fas fa-percentage me-1"></i>Percentual de THC (%) *
+                            </label>
+                            <input type="number" class="form-control" id="thc_percentual" name="thc_percentual" 
+                                   step="0.01" min="0" max="100" required>
+                            <div class="form-text">Valor entre 0.00 e 100.00</div>
+                        </div>
+                        
+                        <!-- CBD Percentual -->
+                        <div class="col-md-6 mb-3">
+                            <label for="cbd_percentual" class="form-label">
+                                <i class="fas fa-percentage me-1"></i>Percentual de CBD (%) *
+                            </label>
+                            <input type="number" class="form-control" id="cbd_percentual" name="cbd_percentual" 
+                                   step="0.01" min="0" max="100" required>
+                            <div class="form-text">Valor entre 0.00 e 100.00</div>
+                        </div>
+                        
+                        <!-- Status ANVISA -->
+                        <div class="col-md-6 mb-3">
+                            <label for="status_anvisa" class="form-label">
+                                <i class="fas fa-certificate me-1"></i>Status ANVISA *
+                            </label>
+                            <select class="form-select" id="status_anvisa" name="status_anvisa" required>
+                                <option value="pendente">Pendente</option>
+                                <option value="aprovado">Aprovado</option>
+                                <option value="reprovado">Reprovado</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Validação de Risco -->
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-warning d-none" id="risco-alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Atenção:</strong> Produtos com THC > 0.3% não podem ter status "Aprovado"
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botões -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'produtos:index' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Voltar
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="submit-btn">
+                            <i class="fas fa-save me-1"></i>Cadastrar Produto
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Configurações da API
+const API_BASE_URL = '{% url "produtos:produtos_api" %}';
+
+// Função para mostrar alertas
+function showAlert(message, type = 'info') {
+    const alertContainer = document.getElementById('alert-container');
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    alertContainer.innerHTML = alertHtml;
+}
+
+// Função para validar THC vs Status ANVISA
+function validateThcStatus() {
+    const thc = parseFloat(document.getElementById('thc_percentual').value) || 0;
+    const status = document.getElementById('status_anvisa').value;
+    const alert = document.getElementById('risco-alert');
+    
+    if (thc > 0.3 && status === 'aprovado') {
+        alert.classList.remove('d-none');
+        return false;
+    } else {
+        alert.classList.add('d-none');
+        return true;
+    }
+}
+
+// Event listeners para validação em tempo real
+document.getElementById('thc_percentual').addEventListener('input', validateThcStatus);
+document.getElementById('status_anvisa').addEventListener('change', validateThcStatus);
+
+// Função para enviar formulário
+async function submitForm(formData) {
+    try {
+        const response = await fetch(API_BASE_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(Object.values(errorData).flat().join(', '));
+        }
+        
+        const result = await response.json();
+        showAlert('Produto cadastrado com sucesso!', 'success');
+        
+        // Limpar formulário
+        document.getElementById('produto-form').reset();
+        
+        // Redirecionar após 2 segundos
+        setTimeout(() => {
+            window.location.href = '{% url "produtos:index" %}';
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Erro:', error);
+        showAlert('Erro ao cadastrar produto: ' + error.message, 'danger');
+    }
+}
+
+// Função para obter cookie CSRF
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Event listener para envio do formulário
+document.getElementById('produto-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Validar campos obrigatórios
+    const requiredFields = ['nome', 'tipo_espectro', 'thc_percentual', 'cbd_percentual', 'categoria_terapeutica', 'status_anvisa'];
+    const missingFields = requiredFields.filter(field => !document.getElementById(field).value);
+    
+    if (missingFields.length > 0) {
+        showAlert('Por favor, preencha todos os campos obrigatórios.', 'danger');
+        return;
+    }
+    
+    // Validar THC vs Status
+    if (!validateThcStatus()) {
+        showAlert('Produtos com THC superior a 0.3% não podem ter status "Aprovado".', 'danger');
+        return;
+    }
+    
+    // Preparar dados
+    const formData = {
+        nome: document.getElementById('nome').value,
+        tipo_espectro: document.getElementById('tipo_espectro').value,
+        thc_percentual: parseFloat(document.getElementById('thc_percentual').value),
+        cbd_percentual: parseFloat(document.getElementById('cbd_percentual').value),
+        categoria_terapeutica: document.getElementById('categoria_terapeutica').value,
+        status_anvisa: document.getElementById('status_anvisa').value
+    };
+    
+    // Desabilitar botão durante envio
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Cadastrando...';
+    
+    // Enviar dados
+    submitForm(formData).finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-save me-1"></i>Cadastrar Produto';
+    });
+});
+</script>
+{% endblock %} 

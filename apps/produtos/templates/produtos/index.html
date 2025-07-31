@@ -1,0 +1,176 @@
+{% extends 'produtos/base.html' %}
+{% load static %}
+
+{% block title %}Lista de Produtos{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-list me-2"></i>Lista de Produtos
+            </h1>
+            <a href="{% url 'produtos:cadastro' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Novo Produto
+            </a>
+        </div>
+        
+        <!-- Alertas -->
+        <div id="alert-container"></div>
+        
+        <!-- Loading -->
+        <div id="loading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2 text-muted">Carregando produtos...</p>
+        </div>
+        
+        <!-- Tabela de produtos -->
+        <div id="produtos-container" class="d-none">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-table me-2"></i>Produtos Cadastrados
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="produtos-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Tipo</th>
+                                    <th>THC (%)</th>
+                                    <th>CBD (%)</th>
+                                    <th>Categoria</th>
+                                    <th>Status ANVISA</th>
+                                    <th>Risco</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="produtos-tbody">
+                                <!-- Produtos serão carregados via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mensagem quando não há produtos -->
+        <div id="no-produtos" class="text-center py-5 d-none">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">Nenhum produto cadastrado</h4>
+            <p class="text-muted">Clique no botão "Novo Produto" para começar.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Configurações da API
+const API_BASE_URL = '{% url "produtos:produtos_api" %}';
+const API_RISCO_URL = '{% url "produtos:produtos_risco_api" %}';
+
+// Função para mostrar alertas
+function showAlert(message, type = 'info') {
+    const alertContainer = document.getElementById('alert-container');
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    alertContainer.innerHTML = alertHtml;
+}
+
+// Função para carregar produtos
+async function loadProdutos() {
+    try {
+        const response = await fetch(API_BASE_URL);
+        if (!response.ok) {
+            throw new Error('Erro ao carregar produtos');
+        }
+        
+        const produtos = await response.json();
+        displayProdutos(produtos);
+        
+    } catch (error) {
+        console.error('Erro:', error);
+        showAlert('Erro ao carregar produtos: ' + error.message, 'danger');
+    } finally {
+        document.getElementById('loading').classList.add('d-none');
+    }
+}
+
+// Função para exibir produtos na tabela
+function displayProdutos(produtos) {
+    const tbody = document.getElementById('produtos-tbody');
+    const container = document.getElementById('produtos-container');
+    const noProdutos = document.getElementById('no-produtos');
+    
+    if (produtos.length === 0) {
+        container.classList.add('d-none');
+        noProdutos.classList.remove('d-none');
+        return;
+    }
+    
+    container.classList.remove('d-none');
+    noProdutos.classList.add('d-none');
+    
+    tbody.innerHTML = produtos.map(produto => `
+        <tr class="${produto.tem_risco ? 'table-danger' : ''}">
+            <td>
+                <strong>${produto.nome}</strong>
+                ${produto.tem_risco ? '<i class="fas fa-exclamation-triangle text-danger ms-2" title="Produto com risco"></i>' : ''}
+            </td>
+            <td>
+                <span class="badge bg-secondary">${produto.tipo_espectro_label}</span>
+            </td>
+            <td>
+                <span class="badge ${produto.thc_percentual > 0.3 ? 'bg-warning' : 'bg-success'}">
+                    ${produto.thc_percentual}%
+                </span>
+            </td>
+            <td>
+                <span class="badge bg-info">${produto.cbd_percentual}%</span>
+            </td>
+            <td>
+                <span class="badge bg-primary">${produto.categoria_terapeutica_label}</span>
+            </td>
+            <td>
+                <span class="badge ${produto.status_anvisa === 'aprovado' ? 'bg-success' : produto.status_anvisa === 'pendente' ? 'bg-warning' : 'bg-danger'}">
+                    ${produto.status_anvisa_label}
+                </span>
+            </td>
+            <td>
+                ${produto.tem_risco ? 
+                    `<span class="badge bg-danger">
+                        <i class="fas fa-exclamation-triangle me-1"></i>Risco
+                    </span>` : 
+                    `<span class="badge bg-success">
+                        <i class="fas fa-check me-1"></i>Seguro
+                    </span>`
+                }
+            </td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary" onclick="viewProduto(${produto.id})" title="Ver detalhes">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Função para visualizar produto (placeholder)
+function viewProduto(id) {
+    showAlert(`Visualizando produto ID: ${id}`, 'info');
+}
+
+// Carregar produtos quando a página carregar
+document.addEventListener('DOMContentLoaded', loadProdutos);
+</script>
+{% endblock %} 
