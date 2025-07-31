@@ -2,13 +2,13 @@
 
 > **Painel interno para cadastrar e monitorar produtos medicinais à base de canabinoides conforme regras da ANVISA**
 
-Este projeto nasceu da necessidade de criar um sistema interno para empresas farmacêuticas que trabalham com produtos à base de canabinoides (THC/CBD). O objetivo é facilitar o cadastro, monitoramento e controle de produtos que precisam seguir rigorosas regulamentações da ANVISA, especialmente aqueles com alto teor de THC destinados a grupos sensíveis como neurologia e pediatria.
+Este projeto veio de um teste para criar um sistema interno para empresas farmacêuticas que trabalham com produtos à base de canabinoides (THC/CBD). O objetivo é facilitar o cadastro, monitoramento e controle de produtos que precisam seguir rigorosas regulamentações da ANVISA, especialmente aqueles com alto teor de THC destinados a grupos sensíveis como neurologia e pediatria.
 
 ## 📌 Sobre o Projeto
 
 ### 🎯 Propósito Real
 
-O sistema foi desenvolvido para atender uma demanda específica do setor farmacêutico: **monitorar produtos canabinoides que podem representar risco quando destinados a grupos sensíveis**. 
+O sistema foi desenvolvido para atender um caso em especifico: **monitorar produtos canabinoides que podem representar risco quando destinados a certos grupos**. 
 
 **Problema que resolve:**
 - Produtos com THC > 0.3% não podem ter status "Aprovado" na ANVISA
@@ -17,7 +17,7 @@ O sistema foi desenvolvido para atender uma demanda específica do setor farmac�
 - Controle centralizado de todos os produtos canabinoides da empresa
 
 **Solução implementada:**
-- Sistema web completo com backend robusto e frontend intuitivo
+- Sistema web completo com backend robusto e frontend simples
 - Validações automáticas baseadas nas regras da ANVISA
 - Destaque visual para produtos que precisam de análise especial
 - API REST para integração com outros sistemas da empresa
@@ -27,22 +27,21 @@ O sistema foi desenvolvido para atender uma demanda específica do setor farmac�
 Optei por uma arquitetura **monolítica com Django** por alguns motivos específicos:
 
 1. **Simplicidade de Deploy**: Uma única aplicação é mais fácil de manter e deployar
-2. **Integração Perfeita**: DRF + Django Templates funcionam como uma luva
-3. **Performance**: Não há overhead de comunicação entre frontend/backend separados
-4. **Manutenibilidade**: Tudo em um lugar, fácil de debugar e modificar
+2. **Integração Perfeita**: DRF + Django Templates funcionam bem juntas
+3. **Manutenibilidade**: Tudo em um lugar, fácil de debugar e modificar
 
 ## 🛠 Tecnologias Utilizadas
 
 ### Backend
-- **Django 4.2.7**: Framework web robusto e maduro
-- **Django REST Framework**: Para APIs REST elegantes e bem documentadas
+- **Django**: Framework web robusto e maduro
+- **Django REST Framework**: Para APIs REST
 - **SQLite**: Banco simples para desenvolvimento (fácil de trocar para PostgreSQL em produção)
 - **python-decouple**: Para gerenciar variáveis de ambiente
 
 ### Frontend
 - **Django Templates**: Renderização server-side rápida e SEO-friendly
-- **Bootstrap 5**: Framework CSS responsivo e moderno
-- **JavaScript Puro**: Sem frameworks complexos, apenas vanilla JS com fetch()
+- **Bootstrap 5**: Framework CSS responsivo
+- **JavaScript Puro**: Sem frameworks complexos
 - **Font Awesome**: Ícones profissionais
 
 ### Por que essas escolhas?
@@ -304,34 +303,6 @@ function getRiskClass(produto) {
 - **JavaScript**: Interatividade e consumo da API
 - **Templates Django**: Renderização server-side
 
-## 🧪 Possíveis Melhorias Futuras
-
-### Funcionalidades de Negócio
-- **Filtros avançados**: Por categoria, status, faixa de THC
-- **Paginação**: Para grandes volumes de produtos
-- **Exportação**: Relatórios em PDF/Excel
-- **Notificações**: Alertas por email para produtos de risco
-- **Histórico**: Log de alterações nos produtos
-
-### Melhorias Técnicas
-- **Autenticação**: Sistema de login para diferentes níveis de acesso
-- **Testes automatizados**: Unit tests e integration tests
-- **Cache**: Redis para melhor performance
-- **Logs**: Sistema de logging estruturado
-- **Monitoramento**: Métricas de uso e performance
-
-### Infraestrutura
-- **Docker**: Containerização para facilitar deploy
-- **CI/CD**: Pipeline automatizado de testes e deploy
-- **Backup**: Sistema automático de backup do banco
-- **SSL**: Certificado HTTPS para produção
-
-### Frontend
-- **PWA**: Progressive Web App para uso offline
-- **Gráficos**: Dashboards com charts de produtos por categoria
-- **Drag & Drop**: Interface mais intuitiva para cadastro
-- **Dark Mode**: Tema escuro para melhor UX
-
 ## 🧪 Scripts de Teste e População
 
 ### População do Banco de Dados
@@ -383,15 +354,10 @@ O script `populate_db.py` cria produtos que demonstram:
 
 ## 👨‍💻 Autor
 
-**Victor Ruiz**
-- Desenvolvedor Full Stack
-- Especialista em Django e Python
-- Foco em sistemas web robustos e escaláveis
+**Victor Ruiz Scarassati**
 
 ## 📄 Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
 
 ---
-
-**Desenvolvido com ❤️ usando Django 4.x + DRF + Bootstrap 5** 
